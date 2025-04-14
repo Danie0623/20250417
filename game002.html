@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文字輸入</title>
+    <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+          overflow: hidden; /* 防止畫布外溢 */
+        }
+
+        canvas {
+          display: block;
+        }
+    </style>
+    <!-- 引入 p5.js 库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
+  </head>
+
+  <body>
+    <input type="text" id="textInput" placeholder="輸入文字" oninput="updateText()" style="width: 150px; height: 40px; font-size: 24px;">
+    <input type="range" id="textSizeSlider" min="28" max="50" value="32" oninput="updateTextSize()" style="height: 40px;">
+    <button onclick="toggleBounce()" style="height: 40px; font-size: 24px;">文字跳動</button>
+    <select id="weekSelect" onchange="navigateToLink()" style="height: 40px; font-size: 24px;">
+      <option value="">選擇周次</option>
+      <option value="https://www.tku.edu.tw/">第一周</option>
+      <option value="http://www.et.tku.edu.tw/">第二周</option>
+      <option value="https://hackmd.io/@DANIELSHOW/BkDKIKzjJx">第三周</option>
+    </select>
+
+    <script>
+      let inputText = "輸入的文字";
+      let textSizeValue = 32;
+      let bouncing = false;
+      let bounceOffset = 0;
+
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        textAlign(CENTER, CENTER);
+      }
+
+      function draw() {
+        background(0); // 背景顏色為黑色
+        textSize(textSizeValue); // 文字大小
+        fill(255); // 文字顏色為白色
+
+        let x = 100; // 初始 x 座標
+        let y = 100; // 初始 y 座標
+
+        while (y < height) {
+          for (let i = 0; i < inputText.length; i++) {
+            let char = inputText.charAt(i);
+            let bounceOffset = bouncing ? sin(frameCount * 0.1 + x * 0.05) * 10 : 0; // 跳動效果
+            text(char, x, y + bounceOffset);
+            x += textWidth(char) + 5; // 字符間距
+
+            if (x > width) {
+              x = 0;
+              y += 40; // 換行
+            }
+          }
+        }
+      }
+
+      function windowResized() {
+        resizeCanvas(windowWidth, windowHeight); // 畫布大小調整
+      }
+
+      function updateText() {
+        inputText = document.getElementById('textInput').value; // 更新文字
+      }
+
+      function updateTextSize() {
+        textSizeValue = Number(document.getElementById('textSizeSlider').value); // 更新文字大小
+      }
+
+      function toggleBounce() {
+        bouncing = !bouncing; // 切換跳動狀態
+      }
+
+      function navigateToLink() {
+        const select = document.getElementById('weekSelect');
+        const url = select.value;
+        if (url) {
+          window.location.href = url; // 跳轉到選擇的鏈接
+        }
+      }
+    </script>
+  </body>
+</html>

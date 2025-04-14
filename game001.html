@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Quiz</title>
+    <style>
+        html, body {
+  margin: 0;
+  padding: 0;
+}
+
+canvas {
+  display: block;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  margin-top: 50px;
+}
+
+h1 {
+  color: #333;
+}
+
+#question {
+  font-size: 24px;
+  margin: 20px 0;
+}
+
+#answer {
+  padding: 10px;
+  font-size: 16px;
+  width: 200px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+#result {
+  margin-top: 20px;
+  font-size: 18px;
+}
+
+#score {
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>簡單數學題目</h1>
+      <div id="question"></div>
+      <input type="number" id="answer" placeholder="輸入答案">
+      <button id="submit">提交答案</button>
+      <div id="result"></div>
+      <div id="score">分數: 0</div>
+    </div>
+    <script>
+      let score = 0;
+let num1, num2, correctAnswer;
+
+function generateQuestion() {
+  num1 = Math.floor(Math.random() * 10) + 1;
+  num2 = Math.floor(Math.random() * 10) + 1;
+  const isAddition = Math.random() > 0.5;
+  correctAnswer = isAddition ? num1 + num2 : num1 - num2;
+  document.getElementById('question').textContent = `${num1} ${isAddition ? '+' : '-'} ${num2} = ?`;
+}
+
+document.getElementById('submit').addEventListener('click', () => {
+  const userAnswer = parseInt(document.getElementById('answer').value, 10);
+  const resultDiv = document.getElementById('result');
+  if (userAnswer === correctAnswer) {
+    resultDiv.textContent = '正確!';
+    resultDiv.style.color = 'green';
+    score++;
+  } else {
+    resultDiv.textContent = '錯誤!';
+    resultDiv.style.color = 'red';
+  }
+  document.getElementById('score').textContent = `分數: ${score}`;
+  document.getElementById('answer').value = '';
+  generateQuestion();
+});
+
+// 初始化題目
+generateQuestion();
+    </script>
+  </body>
+</html>

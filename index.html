@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dot Animation</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-image: url('image/JIUA11.jpg');
+            min-height: 100vh;
+            background-size: cover;
+            background-position: center top;
+            background-repeat: no-repeat;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1; /* 把它放到背景層 */
+            pointer-events: none; /* 重要：不要吃掉滑鼠事件！ */
+        }
+
+        body {
+            margin: 0;
+            background-color: #0D1321;
+            color: white;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .form-container button {
+            width: 200px;
+            height: 60px;
+            font-size: 18px;
+            padding: 8px;
+            border-radius: 8px;
+            border: 3px solid #ffffff;
+            background-color: white;
+            color: #0D1321;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .form-container button:hover {
+            background-color: #0D1321;
+            color: white;
+        }
+
+        nav {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #ddd;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #58cc02;
+        }
+
+        .quiz-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .quiz-container h2 {
+            color: white;
+        }
+
+        .quiz-container button {
+            width: 150px;
+            height: 40px;
+            font-size: 16px;
+            padding: 8px;
+            border-radius: 8px;
+            border: 2px solid #ffffff;
+            background-color: white;
+            color: #0D1321;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .quiz-container button:hover {
+            background-color: #0D1321;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="about.html">自我介紹</a>
+        <a href="https://hackmd.io/@DANIELSHOW/S1C3fW9Cyl" target="_blank">學習筆記</a>
+        <a href="javascript:showVideo()">學習影片</a>
+    </nav>
+
+    <main class="main-content">
+        <canvas id="space"></canvas>
+
+        <div class="form-container">
+            <button onclick="goToPage('game001')">作品一</button>
+            <button onclick="startQuiz()">測驗卷</button>
+            <button onclick="goToPage('game002')">作品二</button>
+        </div>
+
+        <!-- 測驗卷區塊 -->
+        <div id="quiz-section" class="quiz-container">
+            <h2>VS Code 測驗卷</h2>
+            <div id="quiz-question"></div>
+            <div id="quiz-options"></div>
+            <button onclick="submitAnswer()">提交答案</button>
+            <div id="quiz-result"></div>
+        </div>
+
+        <!-- 學習影片區塊 -->
+        <div id="video-section" class="video-container" style="display: none; text-align: center; margin-top: 20px;">
+            <h2 style="color: white;">學習影片</h2>
+            <video controls width="640" height="360">
+                <source src="https://cfchen58.synology.me/%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%882024/B2/week1/20250217_092821.mp4" type="video/mp4">
+                您的瀏覽器不支援影片播放。
+            </video>
+        </div>
+    </main>
+
+    <script>
+        const questions = [
+            {
+                question: "VS Code 的全名是什麼？",
+                options: ["Visual Studio Code", "Virtual Studio Code", "Visual Script Code"],
+                answer: 0
+            },
+            {
+                question: "如何開啟終端機？",
+                options: ["Ctrl + T", "Ctrl + `", "Ctrl + Alt + T"],
+                answer: 1
+            },
+            {
+                question: "如何安裝擴充套件？",
+                options: ["使用 Marketplace", "使用終端機", "使用設定檔"],
+                answer: 0
+            },
+            {
+                question: "如何快速開啟檔案？",
+                options: ["Ctrl + P", "Ctrl + O", "Ctrl + F"],
+                answer: 0
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function startQuiz() {
+            document.getElementById("quiz-section").style.display = "flex";
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestionIndex];
+            document.getElementById("quiz-question").textContent = question.question;
+
+            const optionsContainer = document.getElementById("quiz-options");
+            optionsContainer.innerHTML = "";
+
+            question.options.forEach((option, index) => {
+                const button = document.createElement("button");
+                button.textContent = option;
+                button.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedIndex) {
+            const question = questions[currentQuestionIndex];
+            if (selectedIndex === question.answer) {
+                score++;
+            }
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+
+        function endQuiz() {
+            const resultContainer = document.getElementById("quiz-result");
+            if (score >= 3) {
+                resultContainer.textContent = `恭喜！你通過了測驗，得分：${score}/${questions.length}`;
+            } else {
+                resultContainer.textContent = `很遺憾，你未通過測驗，得分：${score}/${questions.length}`;
+            }
+        }
+
+        function goToPage(page) {
+            window.location.href = `${page}.html`;
+        }
+
+        function showVideo() {
+            const videoSection = document.getElementById('video-section');
+            videoSection.style.display = 'block'; // 顯示影片區塊
+        }
+    </script>
+
+    <div id="fixed-bg">
+        <canvas id="c"></canvas>
+    </div>
+</body>
+
+</html>
